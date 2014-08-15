@@ -7,6 +7,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.Properties;
+import javax.ws.rs.core.MediaType;
 import javax.xml.namespace.QName;
 import javax.xml.transform.OutputKeys;
 import javax.xml.xquery.XQConnection;
@@ -14,6 +15,7 @@ import javax.xml.xquery.XQDataSource;
 import javax.xml.xquery.XQPreparedExpression;
 import javax.xml.xquery.XQResultSequence;
 import net.sf.saxon.xqj.SaxonXQDataSource;
+import org.apache.commons.io.FilenameUtils;
 
 public class CMDICast {
 
@@ -68,8 +70,12 @@ public class CMDICast {
 			Properties props = new Properties();
 			props.setProperty(OutputKeys.METHOD, "xml");
 			props.setProperty(OutputKeys.INDENT, "yes");
+			props.setProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+			props.setProperty(OutputKeys.STANDALONE, "yes");
+			props.setProperty(OutputKeys.MEDIA_TYPE, MediaType.APPLICATION_XML);
 
-			File output = new File(cmdifile.getAbsolutePath() + ".dc");
+			String name = FilenameUtils.removeExtension(cmdifile.getName());
+			File output = new File(cmdifile.getParent(), name + ".dc.xml");
 			BufferedOutputStream outputStream = new BufferedOutputStream(new FileOutputStream(output));
 			result.writeSequence(outputStream, props);
 			return output;

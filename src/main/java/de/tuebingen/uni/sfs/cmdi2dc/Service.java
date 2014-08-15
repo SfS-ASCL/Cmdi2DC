@@ -1,8 +1,12 @@
 package de.tuebingen.uni.sfs.cmdi2dc;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,9 +19,11 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import javax.xml.xquery.XQException;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -41,11 +47,19 @@ public class Service {
 	@Path("{id}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response getFile(@PathParam("id") String id) throws IOException {
-		File f = new File(SessionTmpDir.getSessionDir(request.getSession()), id);
+		final File f = new File(SessionTmpDir.getSessionDir(request.getSession()), id);
 		if (!f.exists()) {
 			return Response.status(404).entity("File not found").build();
 		}
-		return Response.ok().entity(f).build();
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException, WebApplicationException {
+				Files.copy(f.toPath(), output);
+			}
+		};
+		return Response.ok(stream, "text/xml")
+				.header("content-disposition", "attachment; filename=" + f.getName())
+				.build();		
 	}
 
 	public static class FileEntry {
@@ -81,7 +95,7 @@ public class Service {
 	@POST
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getDublinCore() throws IOException {
+	public Response toDublinCore() throws IOException {
 		try {
 			if (!ServletFileUpload.isMultipartContent(request)) {
 				return Response.status(400).entity("Multipart content expected, and this is not").build();

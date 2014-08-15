@@ -2,34 +2,35 @@
 
 var Container = React.createClass({
 	getInitialState: function() {
-		return {ok:true, msg:"", files: {}};
+		return {status:"info", msg:"", files: {}};
 	},
 	upload: function(event) {
 		var that = this;
 		var up = new Uploader("rest");
 		up.onSuccess = function() {
-			console.log("upload success", this);
 			if (this.xhr.status === 200) {
 				var json = JSON.parse(this.xhr.response);
-				that.setState( {ok:true, msg:"", files: json});
+				console.log("upload success, ret ok", json, this);
+				that.setState( {status:"success", msg:"Success", files: json});
 			} else {
-				that.setState( {ok:false, msg: this.xhr.response, files: {}});
+				console.log("upload success, ret not ok", this);
+				that.setState( {status:"danger", msg: this.xhr.response, files: {}});
 			}
 		};
+		this.setState( {ok:true, msg:"Uploading, please wait...", files: {}});
 		up.upload(event);
 	},
 	render: function() {
-		var style = {marginTop:"20px"};
 		return (
 			<div className="container">
 				<div className="row clearfix">
 					<div className="col-md-12 column">
-						<div className="jumbotron" style={style}>
+						<div className="jumbotron">
 							<h2>CMDI to Dublin Core transformer</h2>
 							<p>This web service allows you to convert a CMDI metadata file to the Dublin Core format.</p> 
 						</div>
 						<FileUploadBox onUpload={this.upload}/>
-						<StatusBox ok={this.state.ok} text={this.state.msg}/>
+						<StatusBox status={this.state.status} text={this.state.msg} progress={this.state.progress}/>
 						<DownloadBox files={this.state.files}/>
 					</div>
 				</div>
@@ -48,14 +49,16 @@ var FileUploadBox = React.createClass({
 	render: function() {
 		var specialAddon = {marginRight:"10px", border:"none", background:"none"};
 		return (
-			<div className="fileUploadBox input-group">
-				<span style={specialAddon}>
-					Upload your CMDI files:
-				</span>
-				<span className="btn btn-default btn-file"> 
-					Browse 
-					<input type="file" name="fileUpload" onChange={this.onUpload}></input>
-				</span>
+			<div className="fileUploadBox">
+				<div className="input-group">
+					<span style={specialAddon}>
+						Upload your CMDI files:
+					</span>
+					<span className="btn btn-default btn-file"> 
+						Browse 
+						<input type="file" name="fileUpload" onChange={this.onUpload}></input>
+					</span>
+				</div>
 			</div>
 		);
 	}
@@ -63,16 +66,16 @@ var FileUploadBox = React.createClass({
 
 var StatusBox = React.createClass({
 	propTypes: {
-		ok: React.PropTypes.bool.isRequired,
+		status: React.PropTypes.string.isRequired,
 		text:  React.PropTypes.string.isRequired
 	},
 	render: function() {
-		var x;
-		if (!this.props.ok)
-			x = <div className="alert alert-danger" role="alert">{this.props.text}</div>;
-		else if (this.props.text.length > 0)
-			x = <div className="alert alert-success" role="alert">{this.props.text}</div>;
-		return (<div className="statusBox"> {x} </div> );
+		var style = {marginTop:"10px"};
+		var className="alert alert-" + this.props.status;
+		if (this.props.text.length === 0) 
+			return <div/>;		return 	<div className="statusBox" style={style}>
+					<div className={className} role="alert">{this.props.text}</div>
+				</div> ;
 	}
 });
 
@@ -90,8 +93,9 @@ var DownloadBox = React.createClass({
 		files: React.PropTypes.object.isRequired
 	},
 	render: function() {
-		var files = iterateMap(this.props.files, function (i, k, v) {
-			return <li key={i} className="list-group-item"><a href={k}>{v}</a></li>;
+		var files = [];
+		iterateMap(this.props.files, function (i, k, v) {
+			files.push(<li key={i} className="list-group-item"><a href={v}>{k}</a></li>);
 		});
 		var header = $.isEmptyObject(files) ? (<span></span>) : (<p>Download Dublin Core: </p>);
 		return (<div> {header}

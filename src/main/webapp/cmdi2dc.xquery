@@ -19,10 +19,13 @@ declare variable $cmdSchema external;
 declare variable $document external;
 
 
-<dc>
+<oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
+	xmlns:dc="http://purl.org/dc/elements/1.1/"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
 {
 	let $dcConf := <datcatmap>
-			<facet name="title">
+			<facet name="dc:title">
 				<dcid>http://www.isocat.org/datcat/DC-2536</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2537</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2544</dcid>
@@ -39,7 +42,7 @@ declare variable $document external;
 				<dcid>http://www.isocat.org/datcat/DC-6119</dcid>
 			</facet>
 
-			<facet name="contributor">
+			<facet name="dc:contributor">
 				<dcid>http://www.isocat.org/datcat/DC-2522</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-3793</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-4115</dcid>
@@ -47,15 +50,15 @@ declare variable $document external;
 				<dcid>http://www.isocat.org/datcat/DC-4128</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-5414</dcid>
 			</facet>
-			<facet name="coverage">
+			<facet name="dc:coverage">
 			</facet>
-			<facet name="creator">
+			<facet name="dc:creator">
 				<dcid>http://www.isocat.org/datcat/DC-2512</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2513</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2542</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-4118</dcid>
 			</facet>
-			<facet name="date">
+			<facet name="dc:date">
 				<dcid>http://www.isocat.org/datcat/DC-2509</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2510</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2515</dcid>
@@ -69,23 +72,23 @@ declare variable $document external;
 				<dcid>http://purl.org/dc/terms/date</dcid>
 				<dcid>http://purl.org/dc/terms/issued</dcid>
 			</facet>
-			<facet name="description">
+			<facet name="dc:description">
 				<dcid>http://www.isocat.org/datcat/DC-2520</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-6124</dcid>
 			</facet>
-			<facet name="format">
+			<facet name="dc:format">
 				<dcid>http://www.isocat.org/datcat/DC-2465</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2562</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2571</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2689</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-4085</dcid>
 			</facet>
-			<facet name="identifier">
+			<facet name="dc:identifier">
 				<dcid>http://www.isocat.org/datcat/DC-3894</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-4119</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-4120</dcid>
 			</facet>
-			<facet name="language">
+			<facet name="dc:language">
 				<dcid>http://www.isocat.org/datcat/DC-2468</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2482</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2483</dcid>
@@ -95,26 +98,26 @@ declare variable $document external;
 				<dcid>http://www.isocat.org/datcat/DC-5358</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-5361</dcid>
 			</facet>
-			<facet name="publisher">
+			<facet name="dc:publisher">
 				<dcid>http://www.isocat.org/datcat/DC-2459</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2979</dcid>
 				<dcid>http://purl.org/dc/terms/publisher</dcid>
 				<dcid>http://purl.org/dc/elements/1.1/publisher</dcid>
 			</facet>
-			<facet name="relation">
+			<facet name="dc:relation">
 			</facet>
-			<facet name="rights">
+			<facet name="dc:rights">
 				<dcid>http://www.isocat.org/datcat/DC-2453</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2456</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-3800</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-2457</dcid>
 			</facet>
-			<facet name="source">
+			<facet name="dc:source">
 			</facet>
-			<facet name="subject">
+			<facet name="dc:subject">
 			</facet>
 
-			<facet name="type">
+			<facet name="dc:type">
 				<dcid>http://www.isocat.org/datcat/DC-3786</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-3789</dcid>
 				<dcid>http://www.isocat.org/datcat/DC-3795</dcid>
@@ -142,4 +145,4 @@ declare variable $document external;
 						else $txt )
 		return element {$facet/@name} {$value}
 }
-</dc>
+</oai_dc:dc>

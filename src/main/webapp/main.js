@@ -2,34 +2,35 @@
 
 var Container = React.createClass({displayName: 'Container',
 	getInitialState: function() {
-		return {ok:true, msg:"", files: {}};
+		return {status:"info", msg:"", files: {}};
 	},
 	upload: function(event) {
 		var that = this;
 		var up = new Uploader("rest");
 		up.onSuccess = function() {
-			console.log("upload success", this);
 			if (this.xhr.status === 200) {
 				var json = JSON.parse(this.xhr.response);
-				that.setState( {ok:true, msg:"", files: json});
+				console.log("upload success, ret ok", json, this);
+				that.setState( {status:"success", msg:"Success", files: json});
 			} else {
-				that.setState( {ok:false, msg: this.xhr.response, files: {}});
+				console.log("upload success, ret not ok", this);
+				that.setState( {status:"danger", msg: this.xhr.response, files: {}});
 			}
 		};
+		this.setState( {ok:true, msg:"Uploading, please wait...", files: {}});
 		up.upload(event);
 	},
 	render: function() {
-		var style = {marginTop:"20px"};
 		return (
 			React.DOM.div({className: "container"}, 
 				React.DOM.div({className: "row clearfix"}, 
 					React.DOM.div({className: "col-md-12 column"}, 
-						React.DOM.div({className: "jumbotron", style: style}, 
+						React.DOM.div({className: "jumbotron"}, 
 							React.DOM.h2(null, "CMDI to Dublin Core transformer"), 
 							React.DOM.p(null, "This web service allows you to convert a CMDI metadata file to the Dublin Core format.")
 						), 
 						FileUploadBox({onUpload: this.upload}), 
-						StatusBox({ok: this.state.ok, text: this.state.msg}), 
+						StatusBox({status: this.state.status, text: this.state.msg, progress: this.state.progress}), 
 						DownloadBox({files: this.state.files})
 					)
 				)
@@ -48,13 +49,15 @@ var FileUploadBox = React.createClass({displayName: 'FileUploadBox',
 	render: function() {
 		var specialAddon = {marginRight:"10px", border:"none", background:"none"};
 		return (
-			React.DOM.div({className: "fileUploadBox input-group"}, 
-				React.DOM.span({style: specialAddon}, 
-					"Upload your CMDI files:"
-				), 
-				React.DOM.span({className: "btn btn-default btn-file"}, 
-					"Browse",  
-					React.DOM.input({type: "file", name: "fileUpload", onChange: this.onUpload})
+			React.DOM.div({className: "fileUploadBox"}, 
+				React.DOM.div({className: "input-group"}, 
+					React.DOM.span({style: specialAddon}, 
+						"Upload your CMDI files:"
+					), 
+					React.DOM.span({className: "btn btn-default btn-file"}, 
+						"Browse",  
+						React.DOM.input({type: "file", name: "fileUpload", onChange: this.onUpload})
+					)
 				)
 			)
 		);
@@ -63,16 +66,16 @@ var FileUploadBox = React.createClass({displayName: 'FileUploadBox',
 
 var StatusBox = React.createClass({displayName: 'StatusBox',
 	propTypes: {
-		ok: React.PropTypes.bool.isRequired,
+		status: React.PropTypes.string.isRequired,
 		text:  React.PropTypes.string.isRequired
 	},
 	render: function() {
-		var x;
-		if (!this.props.ok)
-			x = React.DOM.div({className: "alert alert-danger", role: "alert"}, this.props.text);
-		else if (this.props.text.length > 0)
-			x = React.DOM.div({className: "alert alert-success", role: "alert"}, this.props.text);
-		return (React.DOM.div({className: "statusBox"}, " ", x, " ") );
+		var style = {marginTop:"10px"};
+		var className="alert alert-" + this.props.status;
+		if (this.props.text.length === 0) 
+			return React.DOM.div(null);		return 	React.DOM.div({className: "statusBox", style: style}, 
+					React.DOM.div({className: className, role: "alert"}, this.props.text)
+				) ;
 	}
 });
 
@@ -90,8 +93,9 @@ var DownloadBox = React.createClass({displayName: 'DownloadBox',
 		files: React.PropTypes.object.isRequired
 	},
 	render: function() {
-		var files = iterateMap(this.props.files, function (i, k, v) {
-			return React.DOM.li({key: i, className: "list-group-item"}, React.DOM.a({href: k}, v));
+		var files = [];
+		iterateMap(this.props.files, function (i, k, v) {
+			files.push(React.DOM.li({key: i, className: "list-group-item"}, React.DOM.a({href: v}, k)));
 		});
 		var header = $.isEmptyObject(files) ? (React.DOM.span(null)) : (React.DOM.p(null, "Download Dublin Core: "));
 		return (React.DOM.div(null, " ", header, 
