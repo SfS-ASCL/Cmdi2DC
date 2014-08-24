@@ -4,7 +4,7 @@
 
 	<groupId>de.tuebingen.uni.sfs</groupId>
 	<artifactId>Cmdi2DC</artifactId>
-	<version>1.0</version>
+	<version>1.0.3</version>
 	<packaging>war</packaging>
 
 	<name>Cmdi2DC</name>

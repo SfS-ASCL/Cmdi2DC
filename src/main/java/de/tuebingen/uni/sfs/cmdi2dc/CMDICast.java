@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.security.AccessControlException;
 import java.util.Properties;
 import javax.ws.rs.core.MediaType;
 import javax.xml.namespace.QName;
@@ -37,27 +38,29 @@ public class CMDICast {
 	}
 
 	public static InputStream getInputStream(String filename) {
-		System.out.println(filename + "");
 		try {
 			return new FileInputStream(filename);
-		} catch (FileNotFoundException xc) {
+		} catch (FileNotFoundException | AccessControlException xc) { //ignore
 		}
-		System.out.println(filename + " from webapp");
 		try {
 			return new FileInputStream("src/main/webapp/" + filename);
-		} catch (FileNotFoundException xc) {
+		} catch (FileNotFoundException | AccessControlException xc) { //ignore
 		}
 
 		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		System.out.println(filename + " as resource");
-		InputStream is = cl.getResourceAsStream(filename);
-		return (is != null) ? is
-				: cl.getResourceAsStream("../../" + filename);
+		InputStream is = null;
+		try {
+			is = cl.getResourceAsStream(filename);
+		} catch (AccessControlException xc) { //ignore
+			xc.printStackTrace();
+		}
+		return (is != null) ? is : cl.getResourceAsStream("../../" + filename);
 	}
 
 	public static File castFile(File cmdifile) throws Exception {
 		XQDataSource ds = new SaxonXQDataSource();
 		XQConnection conn = ds.getConnection();
+//		System.out.println("Cmdi2DC: casting file " + cmdifile.getAbsolutePath());
 
 		try (InputStream cmdi2dc = getInputStream("cmdi2dc.xquery");
 				InputStream cmdSchema = getInputStream("cmdSchema.xml");

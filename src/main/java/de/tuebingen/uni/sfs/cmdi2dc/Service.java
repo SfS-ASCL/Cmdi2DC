@@ -1,10 +1,8 @@
 package de.tuebingen.uni.sfs.cmdi2dc;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -44,12 +42,14 @@ public class Service {
 	HttpServletResponse response;
 
 	@GET
-	@Path("{id}")
+	@Path("{sessiondir}/{id}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	public Response getFile(@PathParam("id") String id) throws IOException {
-		final File f = new File(SessionTmpDir.getSessionDir(request.getSession()), id);
+	public Response getFile(@PathParam("sessiondir") String sessiondir, @PathParam("id") String id) throws IOException {
+		final File dir = SessionTmpDir.getSessionDir(request.getSession()).getParentFile();
+		final File f = new File(dir, sessiondir + File.separator + id);
 		if (!f.exists()) {
-			return Response.status(404).entity("File not found").build();
+//			System.out.println("file not found: " + f.getAbsolutePath());
+			return Response.status(404).entity("File not found: " + id).build();
 		}
 		StreamingOutput stream = new StreamingOutput() {
 			@Override
@@ -59,7 +59,7 @@ public class Service {
 		};
 		return Response.ok(stream, "text/xml")
 				.header("content-disposition", "attachment; filename=" + f.getName())
-				.build();		
+				.build();
 	}
 
 	public static class FileEntry {
@@ -106,10 +106,11 @@ public class Service {
 			if (files.isEmpty()) {
 				return Response.status(400).entity("No file!").build();
 			}
+			String sessiondir = SessionTmpDir.getSessionDir(request.getSession()).getName();
 			for (FileEntry fileEntry : files) {
 //				File result = fileEntry.file;
 				File result = CMDICast.castFile(fileEntry.file);
-				results.put(result.getName(), "rest/" + result.getName());
+				results.put(result.getName(), "rest/" + sessiondir + "/" + result.getName());
 			}
 			return Response.ok().entity(results).build();
 		} catch (FileNotFoundException xc) {
