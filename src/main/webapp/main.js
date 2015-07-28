@@ -6,7 +6,7 @@ var Container = React.createClass({displayName: 'Container',
 	},
 	upload: function(event) {
 		var that = this;
-		var up = new Uploader("rest");
+		var up = new Uploader("rest/multi");
 		up.onSuccess = function() {
 			if (this.xhr.status === 200) {
 				var json = JSON.parse(this.xhr.response);
@@ -31,7 +31,11 @@ var Container = React.createClass({displayName: 'Container',
 						), 
 						FileUploadBox({onUpload: this.upload}), 
 						StatusBox({status: this.state.status, text: this.state.msg, progress: this.state.progress}), 
-						DownloadBox({files: this.state.files})
+						DownloadBox({files: this.state.files}), 
+						React.DOM.hr(null), 
+						React.DOM.p(null, "You can also use this service programmatically, like this:"), 
+						React.DOM.pre(null, "$ curl -d @input.cmdi.xml -o output.dc.xml --user username:password http://weblicht.sfs.uni-tuebingen.de/apps/Cmdi2DC/rest"
+						)
 					)
 				)
 			)
@@ -54,7 +58,7 @@ var FileUploadBox = React.createClass({displayName: 'FileUploadBox',
 					React.DOM.span({style: specialAddon}, 
 						"Upload your CMDI files:"
 					), 
-					React.DOM.span({className: "btn btn-default btn-file"}, 
+					React.DOM.span({className: "btn btn-primary btn-file"}, 
 						"Browse",  
 						React.DOM.input({type: "file", name: "fileUpload", onChange: this.onUpload})
 					)

@@ -3,6 +3,7 @@ package de.tuebingen.uni.sfs.cmdi2dc;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -42,7 +43,7 @@ public class Service {
 	HttpServletResponse response;
 
 	@GET
-	@Path("{sessiondir}/{id}")
+	@Path("multi/{sessiondir}/{id}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	public Response getFile(@PathParam("sessiondir") String sessiondir, @PathParam("id") String id) throws IOException {
 		final File dir = SessionTmpDir.getSessionDir(request.getSession()).getParentFile();
@@ -93,9 +94,10 @@ public class Service {
 	}
 
 	@POST
+	@Path("multi")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response toDublinCore() throws IOException {
+	public Response postMulti() throws IOException {
 		try {
 			if (!ServletFileUpload.isMultipartContent(request)) {
 				return Response.status(400).entity("Multipart content expected, and this is not").build();
@@ -110,7 +112,7 @@ public class Service {
 			for (FileEntry fileEntry : files) {
 //				File result = fileEntry.file;
 				File result = CMDICast.castFile(fileEntry.file);
-				results.put(result.getName(), "rest/" + sessiondir + "/" + result.getName());
+				results.put(result.getName(), "rest/multi/" + sessiondir + "/" + result.getName());
 			}
 			return Response.ok().entity(results).build();
 		} catch (FileNotFoundException xc) {
@@ -120,5 +122,21 @@ public class Service {
 		} catch (Exception xc) {
 			return Response.status(500).entity(xc.toString()).build();
 		}
+	}
+
+	@POST
+	@Path("/")
+	public Response postDirect(InputStream is) throws IOException, Exception {
+		File fcmdi = File.createTempFile("cmdi2dc-", ".xml");
+		fcmdi.delete(); // needed by Files.copy
+		Files.copy(is, fcmdi.toPath());
+		final File fdc = CMDICast.castFile(fcmdi);
+		StreamingOutput stream = new StreamingOutput() {
+			@Override
+			public void write(OutputStream output) throws IOException, WebApplicationException {
+				Files.copy(fdc.toPath(), output);
+			}
+		};
+		return Response.ok(stream, "text/xml").build();
 	}
 }
