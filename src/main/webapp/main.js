@@ -27,15 +27,17 @@ var Container = React.createClass({displayName: 'Container',
 					React.DOM.div({className: "col-md-12 column"}, 
 						React.DOM.div({className: "jumbotron"}, 
 							React.DOM.h2(null, "CMDI to Dublin Core transformer"), 
-							React.DOM.p(null, "This web service allows you to convert a CMDI metadata file to the Dublin Core format.")
+							React.DOM.p(null, "This web service allows you to convert a CMDI-based metadata file to the Dublin Core format.")
 						), 
 						FileUploadBox({onUpload: this.upload}), 
 						StatusBox({status: this.state.status, text: this.state.msg, progress: this.state.progress}), 
 						DownloadBox({files: this.state.files}), 
 						React.DOM.hr(null), 
-						React.DOM.p(null, "You can also use this service programmatically, like this:"), 
-						React.DOM.pre(null, "$ curl -d @input.cmdi.xml -o output.dc.xml --user username:password http://weblicht.sfs.uni-tuebingen.de/apps/Cmdi2DC/rest"
-						)
+						React.DOM.p(null, "You can also use this service programmatically (within the SfS), like this:"),
+						React.DOM.pre(null, "$ curl -d @input.cmdi.xml -o output.dc.xml http://weblicht.sfs.uni-tuebingen.de/converter/Cmdi2DC/rest"
+						),
+                                                React.DOM.hr(null), 
+						React.DOM.p(null, "© Seminar für Sprachwissenschaft, Universität Tübingen.")
 					)
 				)
 			)
@@ -56,7 +58,7 @@ var FileUploadBox = React.createClass({displayName: 'FileUploadBox',
 			React.DOM.div({className: "fileUploadBox"}, 
 				React.DOM.div({className: "input-group"}, 
 					React.DOM.span({style: specialAddon}, 
-						"Upload your CMDI files:"
+						"Upload your CMDI file:"
 					), 
 					React.DOM.span({className: "btn btn-primary btn-file"}, 
 						"Browse",  
