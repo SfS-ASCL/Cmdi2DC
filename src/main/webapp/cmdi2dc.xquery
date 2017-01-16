@@ -1,12 +1,14 @@
 (: xquery version "3.0"; :)
 
 declare namespace ft="http://www.w3.org/2002/04/xquery-operators-text";
-(: declare namespace CMD="http://www.clarin.eu/cmd/"; :)
-
-declare namespace CMD1="http://www.clarin.eu/cmd/";
-declare namespace CMD2="http://www.clarin.eu/cmd/2"; (: to do, see final CMDI1.2 specification, must be /1 but some use /2 :)
+declare namespace CMDE="http://www.clarin.eu/cmd/1"; (: CMDI 1.2 Envelope, i.e. the general part of CMDI 1.2 instances:) 
+declare namespace CMD="http://www.clarin.eu/cmd/"; (: This is the namespace used in CMDI 1.1 documents :)
 declare namespace functx = "http://www.functx.com";
 declare namespace oai_dc = "http://www.openarchives.org/OAI/2.0/oai_dc/";
+
+(: namespace CMDP for CMDI 1.2 Payload, i.e. the components, 
+does not have to be declared for the purpose of this query, to keep it independent it will not be declared :)
+
 
 declare function functx:is-node-in-sequence ($node as node()?, $seq as node()* )
 as xs:boolean {
@@ -20,12 +22,8 @@ as node()* {
                                 .,$nodes[position() < $seq]))]
 };
 
-
-declare variable $cmdSchema external;
-declare variable $cmdInstance external;
-
-declare variable $cmd1_version := trace( $cmdInstance//CMD1:CMD[@CMDVersion = "1.1"], "cmd1");
-declare variable $cmd2_version := trace( $cmdInstance//CMD2:CMD[@CMDVersion = "1.2"], "cmd2");
+declare variable $cmdCCSL external;
+declare variable $cmdInstancepath external;
 
 <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -33,15 +31,7 @@ declare variable $cmd2_version := trace( $cmdInstance//CMD2:CMD[@CMDVersion = "1
 	xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
 
 {
-(:
-        let $new_node :=
-        if ( empty( $cmd2_version) ) then
-           element my_node { namespace CMD { 'http://www.clarin.eu/cmd/' } }
-        else 
-           element my_node { namespace CMD { 'http://www.clarin.eu/cmd/2' } }
-
-:)
-
+(: This is the specification of the the mapping of facets to data categories :)
 	let $dcConf := <datcatmap>
 			<facet name="dc:title">
 			(: project name: A short name or abbreviation of the project that led to the creation of the resource or tool/service. :)
@@ -206,42 +196,49 @@ declare variable $cmd2_version := trace( $cmdInstance//CMD2:CMD[@CMDVersion = "1
 				<dcid>http://hdl.handle.net/11459/CCR_C-3804_6b1212ab-efcd-ec8c-4ff2-da70dd8f1be9</dcid>
 				<dcid>http://hdl.handle.net/11459/CCR_C-3806_e55e9ed6-b099-c21d-a634-3c7f4d22a215</dcid>
 			</facet>
-		</datcatmap>
+		</datcatmap> 
+		,
+		$ccslinstance := doc($cmdCCSL),
+		$cmdInstance := doc($cmdInstancepath)
 
         (: in CMDI1.2 the CMD_Version attribute must be present :)
-        return
-        if ( empty($cmd2_version) ) then
-	  for $facet in $dcConf//facet
-	     return 
-		for $value in distinct-values(
-			for $cmdDecl in $cmdSchema//CMD_Element,
-			    $dcid    in $facet/dcid
-			where contains($cmdDecl/@ConceptLink, $dcid/text())
-			return
-				for $cmd in $cmdInstance//CMD1:CMD/CMD1:Components//*
-				where contains( $cmd/name(), $cmdDecl/@name )
-				return 
-					for $txt in $cmd/text()
-					return if (normalize-space($txt) = '')
-						then ()
-						else $txt )
-		return element {$facet/@name} {$value}
+        return 
+        if ($cmdInstance/*:CMD/@CMDVersion="1.2") 
+        then
+         for $facet in $dcConf//facet
+	            return 
+	     	         for $value in distinct-values(
+			                         for $cmdDecl in $ccslinstance//Element,
+			                             $dcid    in $facet/dcid
+			                         where contains($cmdDecl/@ConceptLink, $dcid/text())
+			                         return
+			                             for $cmd in $cmdInstance//CMDE:CMD/CMDE:Components//*
+			                             where contains( $cmd/name(), $cmdDecl/@name )
+			                             return 
+			                                 for $txt in $cmd/text()
+					                         return 
+					                                  if (normalize-space($txt) = '')
+						                              then ()
+						                              else $txt 
+						             )
+		              return element {$facet/@name} {$value}	
         else
-          for $facet in $dcConf//facet
-	    return 
-		for $value in distinct-values(
-			for $cmdDecl in $cmdSchema//CMD_Element,
-			    $dcid    in $facet/dcid
-			where contains($cmdDecl/@ConceptLink, $dcid/text())
-			return
-				for $cmd in $cmdInstance//CMD2:CMD/CMD2:Components//*
-				where contains( $cmd/name(), $cmdDecl/@name )
-				return 
-					for $txt in $cmd/text()
-					return if (normalize-space($txt) = '')
-						then ()
-						else $txt )
-		return element {$facet/@name} {$value}
-
+                for $facet in $dcConf//facet
+	            return 
+	     	         for $value in distinct-values(
+			                         for $cmdDecl in $ccslinstance//CMD_Element,
+			                             $dcid    in $facet/dcid
+			                         where contains($cmdDecl/@ConceptLink, $dcid/text())
+			                         return
+			                             for $cmd in $cmdInstance//CMD:CMD/CMD:Components//*
+			                             where contains( $cmd/name(), $cmdDecl/@name )
+			                             return 
+			                                 for $txt in $cmd/text()
+					                         return 
+					                                  if (normalize-space($txt) = '')
+						                              then ()
+						                              else $txt 
+						             )
+		              return element {$facet/@name} {$value}
 }
 </oai_dc:dc>
