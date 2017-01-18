@@ -90,47 +90,13 @@ public class CMDICast {
                     
                      {    
 			// get the schemaLocation using xpath
-                        // XPathFactory xPathfactory = new org.apache.xpath.jaxp.XPathFactoryImpl();
 			XPathFactory xPathfactory = XPathFactory.newInstance();
 			XPath xpath = xPathfactory.newXPath();
-                        
-                        /*
-                        // there's no default implementation for NamespaceContext...seems kind of silly, no?
-                        xpath.setNamespaceContext(new NamespaceContext() {
-                              public String getNamespaceURI(String prefix) {
-                                 if (prefix == null) throw new NullPointerException("Null prefix");
-                                 else if ("oai".equals(prefix)) return "http://www.openarchives.org/OAI/2.0/";
-                                 else if ("cmd".equals(prefix)) return "http://www.clarin.eu/cmd/";
-                                 else if ("xml".equals(prefix)) return XMLConstants.XML_NS_URI;
-                                   return XMLConstants.NULL_NS_URI;
-                                }
-
-                              // This method isn't necessary for XPath processing.
-                              public String getPrefix(String uri) {
-                                 throw new UnsupportedOperationException();
-                              }
-
-                              // This method isn't necessary for XPath processing either.
-                              public Iterator getPrefixes(String uri) {
-                                 throw new UnsupportedOperationException();
-                             }
-                        });
-
-                        String oai_check_string = "//*[namespace-uri()='http://www.openarchives.org/OAI/2.0/' or @*[namespace-uri()='http://www.openarchives.org/OAI/2.0/']]";
-                        */
-                        
-                        // works: XPathExpression schemaLocation = xpath.compile("string(//@*[local-name()='schemaLocation'])");
                         XPathExpression schemaLocation = xpath.compile("string(//*[local-name()=\"MdProfile\"]/text())");
-
 
 			// In CMDI v1.2 and later, the CMDVersion attribute is obligatory. 
 			XPathExpression CMDIVersion = xpath.compile("string(/*:CMD/@CMDVersion)");
                         
-                        // In case we have no envelope, we can do the following:
-                        String pureString = "string(//CMD/Header/MdProfile)";
-                        // In case we have an OAI-envelope, schemaLocation would return the OAI schema location...
-                        String oaiString = "string(/OAI-PMH/GetRecord[1]/record[1]/metadata[1]/*[namespace-uri()='http://www.clarin.eu/cmd/' and local-name()='CMD'][1]/*[namespace-uri()='http://www.clarin.eu/cmd/' and local-name()='Header'][1]/*[namespace-uri()='http://www.clarin.eu/cmd/' and local-name()='MdProfile'][1])";
-                                
 			// try to parse the cmdifile
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                         factory.setNamespaceAware(true);
