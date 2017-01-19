@@ -10,7 +10,7 @@ The conversion from CMDI to Dublin Core is currently being served at:
 ```http://weblicht.sfs.uni-tuebingen.de/converter/Cmdi2DC/ ```
 
 # Status
-The software is being released as v1.0. It is mostly build by software written by E. Dima.
+The software has no official release yet. The software is mostly baed by software written by E. Dima. It has experimental support for CMDI v1.2.
 
 # Publications
 
